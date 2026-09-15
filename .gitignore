@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+
+scripts/note/.env
+scripts/note/state.json
+scripts/note/scheduled_log.json
+scripts/note/screenshots/

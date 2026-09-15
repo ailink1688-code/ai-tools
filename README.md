@@ -41,3 +41,41 @@ Metricool 公式の MCP サーバー（`https://mcp.metricool.ai/mcp`）をプ�
 - [Metricool MCP について（公式）](https://metricool.com/metricool-mcp-claude/)
 - [Metricool MCP 接続方法（ヘルプセンター）](https://help.metricool.com/how-to-connect-metricools-mcp-eqp9h)
 - [Metricool MCP FAQ](https://help.metricool.com/faqs-about-the-metricool-mcp-1i3w0)
+
+## note 予約投稿ワークフロー（`scripts/note/`）
+
+note.com に公式の投稿APIは無いため、Playwright によるブラウザ自動操作で「予約投稿」を設定するスクリプトです（note の予約投稿機能自体は note プレミアム会員限定・Web版のみ）。
+
+想定するワークフロー:
+
+1. ユーザーが記事タイトルをClaudeに渡す
+2. Claudeが本文を作成し、チャット上でユーザーがレビュー・修正
+3. 承認後、Claudeが `schedule_post.py` を実行し、毎日 **06:30 / 12:00 / 18:00（JST）** の枠のうち直近の空き枠に予約投稿として登録する（`slots.py` が既存の予約と重複しないよう自動計算）
+
+### セットアップ
+
+```bash
+cd scripts/note
+pip install -r requirements.txt
+cp .env.example .env   # NOTE_EMAIL / NOTE_PASSWORD を設定（.envはコミットしない）
+python login_and_save_session.py   # 初回のみ。headedブラウザでログインし state.json を保存
+```
+
+### 使い方
+
+```bash
+# dry-run（最終確定クリックはせず、動作確認用スクリーンショットを screenshots/ に保存）
+python schedule_post.py --title "タイトル" --body-file body.md
+
+# 本番実行（次の空き枠に予約投稿を確定）
+python schedule_post.py --title "タイトル" --body-file body.md --confirm
+
+# 枠を手動指定したい場合
+python schedule_post.py --title "タイトル" --body-file body.md --slot "2026-09-20 06:30" --confirm
+```
+
+### 既知の制約
+
+- **この Claude Code 環境からは note.com への通信がネットワークポリシーでブロックされており、動作未検証**です。note.com に到達できる環境（ご自身のPCなど）で実行してください。
+- UIのボタン名・入力欄は公開情報ベースの実装のため、note側の画面変更で選択できなくなる可能性があります。失敗時は `scripts/note/screenshots/` にスクリーンショットとHTMLを保存するので、それを見てセレクタを調整してください。
+- ログイン情報（`.env`）とセッション（`state.json`）、予約履歴（`scheduled_log.json`）はコミットしない設定（`.gitignore`）にしています。
