@@ -41,3 +41,13 @@ Metricool 公式の MCP サーバー（`https://mcp.metricool.ai/mcp`）をプ�
 - [Metricool MCP について（公式）](https://metricool.com/metricool-mcp-claude/)
 - [Metricool MCP 接続方法（ヘルプセンター）](https://help.metricool.com/how-to-connect-metricools-mcp-eqp9h)
 - [Metricool MCP FAQ](https://help.metricool.com/faqs-about-the-metricool-mcp-1i3w0)
+
+## note 下書き自動保存（おうえん）
+
+`note/queue/*.md` の記事を、ファイル名順に1日1本 note の**下書き**として保存します（公開は note 上で手動）。保存済みは `note/posted/` へ移動します。
+
+- 記事の書式: 1行目 `# タイトル`、以降は Markdown（`##`/`###` 見出しと段落に対応）
+- 実行: `.github/workflows/note-draft.yml`（毎日 07:00 JST / 手動実行も可）
+- 必要な Secret: `NOTE_COOKIE` — ブラウザで note にログインし、開発者ツールから `note.com` への API リクエストの `Cookie` ヘッダー値（`_note_session_v5` を含む）をコピーして登録
+- ローカル確認: `python note/post_draft.py --dry-run`
+- 注意: 非公式 API を使うため、note 側の仕様変更で動かなくなる場合があります。Cookie は定期的に失効します

@@ -1,0 +1,28 @@
+name: note draft
+
+on:
+  schedule:
+    - cron: "0 22 * * *" # 毎日 07:00 JST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r note/requirements.txt
+      - run: python note/post_draft.py
+        env:
+          NOTE_COOKIE: ${{ secrets.NOTE_COOKIE }}
+      - name: 投稿済みを記録
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add note
+          git diff --cached --quiet || (git commit -m "note: 下書き保存済みの記事を posted へ移動" && git push)
